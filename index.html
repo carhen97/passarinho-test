@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nosso Casamento</title>
+<style>
+  :root {
+    --bg: #faf7f4; --card: #ffffff; --ink: #2b2623; --muted: #7a6f68;
+    --line: #e9e1da; --accent: #b0735a; --accent-ink: #ffffff;
+    --ok: #3f7d5b; --warn: #b7791f; --bad: #b3423a; --soft: #f3ebe4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1a1715; --card: #26211e; --ink: #f1ebe6; --muted: #a99d94;
+      --line: #3a332f; --accent: #d49a82; --accent-ink: #1a1715;
+      --ok: #6cc08f; --warn: #e3b65a; --bad: #e68078; --soft: #302a26;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 80px; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; font-size: 28px; margin: 8px 0 2px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .kpi .label { color: var(--muted); font-size: 13px; }
+  .kpi .val { font-size: 24px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi.saldo .val { color: var(--bad); }
+  .kpi.pago .val { color: var(--ok); }
+  .bar { height: 10px; background: var(--soft); border-radius: 99px; overflow: hidden; margin-top: 14px; }
+  .bar i { display: block; height: 100%; background: var(--ok); width: 0; transition: width .3s; }
+  .progress-text { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 22px 0 12px; align-items: center; }
+  .toolbar input, .toolbar select { flex: 1 1 160px; }
+  input, select, textarea, button { font: inherit; color: inherit; }
+  input, select, textarea { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; width: 100%; }
+  input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button { border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button.danger { color: var(--bad); }
+  button.small { padding: 6px 10px; font-size: 14px; }
+  .list { display: grid; gap: 10px; }
+  .item { cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; }
+  .item:hover { border-color: var(--accent); }
+  .item h3 { margin: 0; font-size: 17px; }
+  .item .meta { color: var(--muted); font-size: 13px; }
+  .nums { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 18px; text-align: right; font-variant-numeric: tabular-nums; }
+  .nums small { display: block; color: var(--muted); font-size: 11px; }
+  .nums b { font-size: 15px; }
+  .tag { display: inline-block; font-size: 12px; padding: 2px 9px; border-radius: 99px; background: var(--soft); color: var(--muted); margin-right: 6px; }
+  .tag.ok { color: var(--ok); } .tag.warn { color: var(--warn); } .tag.bad { color: var(--bad); }
+  .mini { grid-column: 1 / -1; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+  dialog { border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--ink);
+    width: min(560px, calc(100vw - 24px)); padding: 20px; max-height: 92vh; }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  dialog h2 { margin: 0 0 14px; font-family: Georgia, serif; font-weight: 500; }
+  .form { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  .form .full { grid-column: 1 / -1; }
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+  .pay { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .pay:last-child { border-bottom: 0; }
+  .sec { margin-top: 18px; font-weight: 600; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row > * { flex: 1 1 120px; }
+  .foot { margin-top: 28px; display: flex; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 13px; align-items: center; }
+  @media (max-width: 620px) {
+    .grid { grid-template-columns: 1fr; }
+    .item { grid-template-columns: 1fr; }
+    .nums { text-align: left; }
+    .form { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Nosso Casamento</h1>
+  <p class="sub">Contratações, valores combinados, o que já foi pago e o que ainda falta.</p>
+
+  <div class="grid">
+    <div class="card kpi"><div class="label">Total contratado</div><div class="val" id="kTotal">R$ 0,00</div></div>
+    <div class="card kpi pago"><div class="label">Total pago</div><div class="val" id="kPago">R$ 0,00</div></div>
+    <div class="card kpi saldo"><div class="label">Saldo a pagar</div><div class="val" id="kSaldo">R$ 0,00</div></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="bar"><i id="bar"></i></div>
+    <div class="progress-text" id="barText">Nenhuma contratação ainda.</div>
+  </div>
+
+  <div class="toolbar">
+    <input id="busca" type="search" placeholder="Buscar fornecedor ou serviço">
+    <select id="filtroCat"></select>
+    <select id="filtroStatus">
+      <option value="">Todos os status</option>
+      <option value="aberto">Com saldo a pagar</option>
+      <option value="quitado">Quitados</option>
+      <option value="atrasado">Com parcela atrasada</option>
+    </select>
+    <button class="primary" id="btnNovo">+ Nova contratação</button>
+  </div>
+
+  <div class="list" id="lista"></div>
+
+  <div class="foot">
+    <span>Os dados ficam salvos neste aparelho.</span>
+    <button class="small" id="btnCsv">Exportar planilha (CSV)</button>
+    <button class="small" id="btnBackup">Baixar backup</button>
+    <button class="small" id="btnRestaurar">Restaurar backup</button>
+    <input type="file" id="fileRestore" accept="application/json" hidden>
+  </div>
+</div>
+
+<!-- Contratação -->
+<dialog id="dlgContrato">
+  <h2 id="tituloContrato">Nova contratação</h2>
+  <form id="formContrato" class="form" method="dialog">
+    <div class="full"><label for="fNome">Fornecedor</label><input id="fNome" required placeholder="Ex.: Buffet Sabor & Arte"></div>
+    <div><label for="fCat">Categoria</label>
+      <select id="fCat"></select></div>
+    <div><label for="fValor">Valor do contrato (R$)</label><input id="fValor" type="number" step="0.01" min="0" required inputmode="decimal"></div>
+    <div><label for="fContato">Contato</label><input id="fContato" placeholder="Nome, telefone ou e-mail"></div>
+    <div><label for="fVenc">Próximo vencimento</label><input id="fVenc" type="date"></div>
+    <div class="full"><label for="fObs">Observações</label><textarea id="fObs" rows="2" placeholder="Forma de pagamento, multa, o que está incluso..."></textarea></div>
+    <div class="full actions">
+      <button type="button" id="cancelContrato">Cancelar</button>
+      <button class="primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Detalhe e pagamentos -->
+<dialog id="dlgDetalhe">
+  <h2 id="dNome"></h2>
+  <div id="dInfo" class="progress-text"></div>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:12px">
+    <div class="card kpi"><div class="label">Contrato</div><div class="val" style="font-size:18px" id="dTotal"></div></div>
+    <div class="card kpi pago"><div class="label">Pago</div><div class="val" style="font-size:18px" id="dPago"></div></div>
+    <div class="card kpi saldo"><div class="label">Saldo</div><div class="val" style="font-size:18px" id="dSaldo"></div></div>
+  </div>
+  <div class="sec">Pagamentos</div>
+  <div id="dPagamentos"></div>
+  <form id="formPag" class="row" style="margin-top:10px" method="dialog">
+    <input id="pData" type="date" required aria-label="Data do pagamento">
+    <input id="pValor" type="number" step="0.01" min="0.01" required placeholder="Valor (R$)" inputmode="decimal" aria-label="Valor pago">
+    <input id="pObs" placeholder="Observação (opcional)" aria-label="Observação">
+    <button class="primary" type="submit">Registrar</button>
+  </form>
+  <div class="actions">
+    <button class="danger" id="dExcluir">Excluir contratação</button>
+    <button id="dEditar">Editar dados</button>
+    <button id="dFechar">Fechar</button>
+  </div>
+</dialog>
+
+<script>
+const CATEGORIAS = ["Espaço e cerimônia","Buffet e bebidas","Decoração e flores","Fotografia e vídeo",
+  "Música e DJ","Vestido e traje","Beleza","Convites e papelaria","Bolo e doces","Lua de mel","Outros"];
+const KEY = "casamento.contratos.v1";
+const $ = id => document.getElementById(id);
+const brl = n => (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const hoje = () => new Date().toISOString().slice(0, 10);
+const fmtData = d => d ? d.split("-").reverse().join("/") : "";
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+let dados = [];
+let abertoId = null;   // contrato aberto no detalhe
+let editandoId = null; // contrato em edição
+
+function carregar() {
+  try { dados = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { dados = []; }
+}
+function salvar() {
+  try { localStorage.setItem(KEY, JSON.stringify(dados)); }
+  catch (e) { alert("Não foi possível salvar neste navegador. Baixe um backup para não perder os dados."); }
+}
+
+const pago = c => c.pagamentos.reduce((s, p) => s + p.valor, 0);
+const saldo = c => Math.max(0, c.valor - pago(c));
+const atrasado = c => saldo(c) > 0 && c.vencimento && c.vencimento < hoje();
+
+function statusTag(c) {
+  if (saldo(c) === 0 && c.valor > 0) return '<span class="tag ok">Quitado</span>';
+  if (atrasado(c)) return '<span class="tag bad">Vencido em ' + fmtData(c.vencimento) + '</span>';
+  if (c.vencimento) return '<span class="tag warn">Vence em ' + fmtData(c.vencimento) + '</span>';
+  return '<span class="tag">Em aberto</span>';
+}
+
+function render() {
+  const total = dados.reduce((s, c) => s + c.valor, 0);
+  const totalPago = dados.reduce((s, c) => s + pago(c), 0);
+  const totalSaldo = dados.reduce((s, c) => s + saldo(c), 0);
+  $("kTotal").textContent = brl(total);
+  $("kPago").textContent = brl(totalPago);
+  $("kSaldo").textContent = brl(totalSaldo);
+  const pct = total ? Math.min(100, totalPago / total * 100) : 0;
+  $("bar").style.width = pct + "%";
+  $("barText").textContent = dados.length
+    ? pct.toFixed(0) + "% pago, " + dados.length + (dados.length === 1 ? " contratação" : " contratações")
+    : "Nenhuma contratação ainda.";
+
+  const q = $("busca").value.trim().toLowerCase();
+  const cat = $("filtroCat").value, st = $("filtroStatus").value;
+  const itens = dados.filter(c =>
+    (!q || (c.nome + " " + c.contato + " " + c.obs).toLowerCase().includes(q)) &&
+    (!cat || c.categoria === cat) &&
+    (!st || (st === "quitado" ? saldo(c) === 0 : st === "aberto" ? saldo(c) > 0 : atrasado(c)))
+  ).sort((a, b) => (a.vencimento || "9999").localeCompare(b.vencimento || "9999"));
+
+  $("lista").innerHTML = itens.length ? itens.map(c => {
+    const p = c.valor ? Math.min(100, pago(c) / c.valor * 100) : 0;
+    return `<div class="card item" data-id="${c.id}" tabindex="0" role="button">
+      <div><h3>${esc(c.nome)}</h3>
+        <div class="meta"><span class="tag">${esc(c.categoria)}</span>${statusTag(c)}</div></div>
+      <div class="nums">
+        <div><small>Contrato</small><b>${brl(c.valor)}</b></div>
+        <div><small>Pago</small><b style="color:var(--ok)">${brl(pago(c))}</b></div>
+        <div><small>Saldo</small><b style="color:var(--bad)">${brl(saldo(c))}</b></div>
+      </div>
+      <div class="bar mini"><i style="width:${p}%"></i></div>
+    </div>`;
+  }).join("") : `<div class="empty">${dados.length ? "Nada encontrado com esse filtro." : "Toque em “Nova contratação” para começar."}</div>`;
+}
+
+function esc(s) { return String(s || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
+
+function abrirDetalhe(id) {
+  const c = dados.find(x => x.id === id); if (!c) return;
+  abertoId = id;
+  $("dNome").textContent = c.nome;
+  $("dInfo").innerHTML = [c.categoria, c.contato, c.obs].filter(Boolean).map(esc).join(" · ");
+  $("dTotal").textContent = brl(c.valor);
+  $("dPago").textContent = brl(pago(c));
+  $("dSaldo").textContent = brl(saldo(c));
+  const pags = [...c.pagamentos].sort((a, b) => a.data.localeCompare(b.data));
+  $("dPagamentos").innerHTML = pags.length ? pags.map(p => `<div class="pay">
+      <span>${fmtData(p.data)}</span><span class="meta">${esc(p.obs)}</span>
+      <b>${brl(p.valor)}</b><button class="small danger" data-del="${p.id}" aria-label="Remover pagamento">Remover</button></div>`).join("")
+    : '<div class="meta" style="padding:8px 0">Nenhum pagamento registrado.</div>';
+  $("pData").value = hoje();
+  $("pValor").value = saldo(c) || "";
+  $("pObs").value = "";
+  if (!$("dlgDetalhe").open) $("dlgDetalhe").showModal();
+}
+
+function abrirContrato(id) {
+  editandoId = id || null;
+  const c = id ? dados.find(x => x.id === id) : null;
+  $("tituloContrato").textContent = c ? "Editar contratação" : "Nova contratação";
+  $("fNome").value = c ? c.nome : "";
+  $("fCat").value = c ? c.categoria : CATEGORIAS[0];
+  $("fValor").value = c ? c.valor : "";
+  $("fContato").value = c ? c.contato : "";
+  $("fVenc").value = c ? c.vencimento : "";
+  $("fObs").value = c ? c.obs : "";
+  $("dlgContrato").showModal();
+}
+
+// Eventos
+$("btnNovo").onclick = () => abrirContrato();
+$("cancelContrato").onclick = () => $("dlgContrato").close();
+$("formContrato").onsubmit = e => {
+  e.preventDefault();
+  const v = parseFloat($("fValor").value);
+  if (!$("fNome").value.trim() || isNaN(v)) return;
+  const campos = { nome: $("fNome").value.trim(), categoria: $("fCat").value, valor: v,
+    contato: $("fContato").value.trim(), vencimento: $("fVenc").value, obs: $("fObs").value.trim() };
+  if (editandoId) Object.assign(dados.find(x => x.id === editandoId), campos);
+  else dados.push({ id: uid(), pagamentos: [], ...campos });
+  salvar(); render();
+  $("dlgContrato").close();
+  if (editandoId && abertoId === editandoId) abrirDetalhe(editandoId);
+};
+
+$("lista").onclick = e => { const el = e.target.closest(".item"); if (el) abrirDetalhe(el.dataset.id); };
+$("lista").onkeydown = e => { if (e.key === "Enter") { const el = e.target.closest(".item"); if (el) abrirDetalhe(el.dataset.id); } };
+
+$("formPag").onsubmit = e => {
+  e.preventDefault();
+  const c = dados.find(x => x.id === abertoId);
+  const v = parseFloat($("pValor").value);
+  if (!c || isNaN(v) || v <= 0) return;
+  c.pagamentos.push({ id: uid(), data: $("pData").value, valor: v, obs: $("pObs").value.trim() });
+  salvar(); render(); abrirDetalhe(abertoId);
+};
+$("dPagamentos").onclick = e => {
+  const id = e.target.dataset.del; if (!id) return;
+  const c = dados.find(x => x.id === abertoId);
+  c.pagamentos = c.pagamentos.filter(p => p.id !== id);
+  salvar(); render(); abrirDetalhe(abertoId);
+};
+$("dFechar").onclick = () => { $("dlgDetalhe").close(); abertoId = null; };
+$("dEditar").onclick = () => abrirContrato(abertoId);
+$("dExcluir").onclick = () => {
+  const c = dados.find(x => x.id === abertoId);
+  if (c && confirm("Excluir “" + c.nome + "” e todos os pagamentos dela?")) {
+    dados = dados.filter(x => x.id !== abertoId);
+    salvar(); render(); $("dlgDetalhe").close(); abertoId = null;
+  }
+};
+
+["busca", "filtroCat", "filtroStatus"].forEach(id => $(id).addEventListener("input", render));
+
+// Exportações
+function baixar(nome, conteudo, tipo) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([conteudo], { type: tipo }));
+  a.download = nome; a.click(); URL.revokeObjectURL(a.href);
+}
+$("btnCsv").onclick = () => {
+  const cel = s => '"' + String(s ?? "").replace(/"/g, '""') + '"';
+  const num = n => n.toFixed(2).replace(".", ",");
+  const linhas = [["Fornecedor","Categoria","Contato","Valor do contrato","Valor pago","Saldo a pagar","Vencimento","Observações"].map(cel).join(";")]
+    .concat(dados.map(c => [c.nome, c.categoria, c.contato, num(c.valor), num(pago(c)), num(saldo(c)), fmtData(c.vencimento), c.obs].map(cel).join(";")));
+  baixar("casamento.csv", "﻿" + linhas.join("\r\n"), "text/csv;charset=utf-8");
+};
+$("btnBackup").onclick = () => baixar("backup casamento " + hoje() + ".json", JSON.stringify(dados, null, 2), "application/json");
+$("btnRestaurar").onclick = () => $("fileRestore").click();
+$("fileRestore").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  f.text().then(t => {
+    const j = JSON.parse(t);
+    if (!Array.isArray(j)) throw 0;
+    if (confirm("Isso substitui os dados atuais pelos do backup. Continuar?")) { dados = j; salvar(); render(); }
+  }).catch(() => alert("Arquivo de backup inválido.")).finally(() => e.target.value = "");
+};
+
+// Início
+$("fCat").innerHTML = CATEGORIAS.map(c => `<option>${c}</option>`).join("");
+$("filtroCat").innerHTML = '<option value="">Todas as categorias</option>' + CATEGORIAS.map(c => `<option>${c}</option>`).join("");
+carregar(); render();
+</script>
+</body>
+</html>
